@@ -74,6 +74,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} #the URL for the upload of the assets
-        asset_path: ./build/your_binary #which is the local path of the file (asset ) to be loaded 
-        asset_name: your_binary         #the name of the file into the release
+        asset_path: ./build/main #which is the local path of the file (asset ) to be loaded 
+        asset_name: main         #the name of the file into the release
         asset_content_type: application/octet-stream  #content of the assets, in this case it's a generic binary type.
