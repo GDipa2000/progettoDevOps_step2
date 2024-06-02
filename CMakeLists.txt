@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 project(MatrixMultiplication)
 
 
@@ -6,11 +6,16 @@ find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
 
 
-include_directories(include)
-
-
-add_subdirectory(googletest)
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+# Utilizzo di FetchContent per includere Google Test
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG release-1.11.0  # Puoi specificare la versione di Google Test che preferisci
+)
+FetchContent_MakeAvailable(googletest)
+# Aggiungi la directory degli header files
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # non aggiungo matrix_mult che non serve
 set(SOURCES src/main.cpp)

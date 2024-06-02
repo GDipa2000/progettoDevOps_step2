@@ -23,10 +23,8 @@ jobs:
         sudo apt-get install -y mpich libgtest-dev cmake
       # Installs necessary dependencies including MPICH for MPI support, libgtest-dev for Google Test, and cmake for building the project
 
-    - name: Setup MPI Environment
-      run: |
-        echo "MPICH_VERSION=$(mpichversion)" >> $GITHUB_ENV
-      # Sets up the MPI environment and logs the version of MPICH installed
+    - name: Setup MPI
+      uses: mpi4py/setup-mpi@v1
 
     - name: Compile and Build Google Test
       run: |
