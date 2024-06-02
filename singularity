@@ -1,0 +1,11 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+%post
+   apt-get update && apt-get install -y mpi
+   git clone https://github.com/GDipaola2000/SE4HPC_project_part2.git
+   cd SE4HPC_project_part2
+   make
+
+%runscript
+   mpirun /src/main.cpp
