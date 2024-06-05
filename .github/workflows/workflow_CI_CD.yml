@@ -63,6 +63,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: List files in build directory
+        run: |
+          echo "Listing contents of the build directory..."
+          ls -la ./build
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -79,7 +84,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_data: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/test_multiplication
           asset_name: test_multiplication
           asset_content_type: application/octet-stream
