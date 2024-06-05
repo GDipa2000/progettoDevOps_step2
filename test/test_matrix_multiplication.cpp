@@ -70,9 +70,8 @@ TEST(MatrixMultiplicationTest, HandlesDifferentSizes) {
    ASSERT_EQ(C[1][0], 10) << "Test with different sizes failed!";
    ASSERT_EQ(C[1][1], 8) << "Test with different sizes failed!";
 }
-
-// Test per verificare la moltiplicazione di matrici che contengono valori negativi.
-/*// Risultato atteso: [[0, -4], [-2, -8]]
+// Test per verificare la moltiplicazione di matrici contenenti valori negativi.
+// Risultato atteso: [[-4, -4], [-10, -8]]
 TEST(MatrixMultiplicationTest, HandlesNegativeValues) {
    std::vector<std::vector<int>> A = {
        {-1, -2}, 
@@ -86,11 +85,11 @@ TEST(MatrixMultiplicationTest, HandlesNegativeValues) {
    
    multiplyMatrices(A, B, C, 2, 2, 2);
    
-   ASSERT_EQ(C[0][0], 0) << "Test with negative values failed!";
+   ASSERT_EQ(C[0][0], -4) << "Test with negative values failed!";
    ASSERT_EQ(C[0][1], -4) << "Test with negative values failed!";
-   ASSERT_EQ(C[1][0], -2) << "Test with negative values failed!";
+   ASSERT_EQ(C[1][0], -10) << "Test with negative values failed!";
    ASSERT_EQ(C[1][1], -8) << "Test with negative values failed!";
-}*/
+}
 
 
 // Test di performance per valutare il tempo di esecuzione della funzione con matrici di grandi dimensioni.
