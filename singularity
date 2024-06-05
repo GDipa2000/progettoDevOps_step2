@@ -1,11 +1,38 @@
+# Questa è la sezione dell'intestazione dove viene definita l'immagine del sistema operativo di base. Qui, usiamo Docker come motore di avvio e selezioniamo Ubuntu 18.04 come nostra immagine di base.
 Bootstrap: docker
 From: ubuntu:18.04
 
+# La sezione %files permette di trasferire file specifici dalla macchina host al container. Qui, i file matrixA.txt e matrixB.txt sono copiati dall'host al container.
+%files
+   /home/karim/Scrivania/ProgettoSE/progettoDevOps_step2/matrixA.txt /progettoDevOps_step2/matrixA.txt
+   /home/karim/Scrivania/ProgettoSE/progettoDevOps_step2/matrixB.txt /progettoDevOps_step2/matrixB.txt
+
+# La sezione %environment è utilizzata per definire le variabili di ambiente che saranno impostate all'interno del container. Qui, vengono configurate TMPDIR e LD_LIBRARY_PATH.
+%environment
+   export TMPDIR=/tmp
+   export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+# La sezione %post contiene comandi che vengono eseguiti dopo che il sistema operativo di base è stato installato. Include l'installazione del software e la configurazione dell'ambiente necessaria per la nostra applicazione.
 %post
-   apt-get update && apt-get install -y mpi git
+   apt-get update && apt-get install -y --fix-missing git make wget g++ libssl-dev mpich libmpich-dev
+   wget https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2.tar.gz
+   tar -xzvf cmake-3.20.2.tar.gz
+   cd cmake-3.20.2
+   ./bootstrap
+   make
+   make install
+   cd ..
+   if [ -d "progettoDevOps_step2" ]; then
+       rm -rf progettoDevops_step2
+   fi
    git clone https://github.com/GDipa2000/progettoDevOps_step2.git
    cd progettoDevOps_step2
+   export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+   cmake .
    make
+   chmod +x main
 
+# La sezione %runscript definisce i comandi che il container eseguirà di default quando viene eseguito. Qui, esegue il programma principale usando MPI.
 %runscript
-   mpirun /src/main.cpp
+   cd /progettoDevOps_step2
+   mpiexec -np 2 ./main /progettoDevOps_step2/matrixA.txt /progettoDevops_step2/matrixB.txt
