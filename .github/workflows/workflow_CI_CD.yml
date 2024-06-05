@@ -1,6 +1,5 @@
 name: C++ MPI Matrix Multiplication CI 
 
-# Trigger the workflow on push or pull request events to the main branch
 on:
   push:
     branches: [ "main" ]
@@ -9,69 +8,65 @@ on:
 
 jobs:
   build-and-test:
-    # Specifies that the job runs on the latest version of Ubuntu
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      # Checks out the source code of your repository, actions/checkout@v4 is in charge of checking the code written runner's virtual machine
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # Checks out the source code of your repository, actions/checkout@v4 is in charge of checking the code into the runner's virtual machine
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y mpich libgtest-dev cmake
-      # Installs necessary dependencies including MPICH for MPI support, libgtest-dev for Google Test, and cmake for building the project
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mpich libgtest-dev cmake
+        # Installs necessary dependencies including MPICH for MPI support, libgtest-dev for Google Test, and cmake for building the project
 
-    - name: Setup MPI
-      uses: mpi4py/setup-mpi@v1
+      - name: Setup MPI
+        uses: mpi4py/setup-mpi@v1
+        # Sets up MPI on the runner using mpi4py/setup-mpi action
 
-    - name: Compile and Build Google Test
-      run: |
-        cd /usr/src/gtest
-        sudo cmake CMakeLists.txt -DBUILD_SHARED_LIBS=ON
-        sudo make
-        sudo cp *.so /usr/lib
-      # Compiles Google Test from source as shared libraries and moves the libraries to /current-user/lib for system-wide access
+      - name: Compile and Build Google Test
+        run: |
+          cd /usr/src/gtest
+          sudo cmake CMakeLists.txt -DBUILD_SHARED_LIBS=ON
+          sudo make
+          sudo cp *.so /usr/lib
+        # Compiles Google Test from source as shared libraries and moves the libraries to /usr/lib for system-wide access
 
-    - name: Configure and Build Project
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DGTEST_LIBRARY=/usr/lib/libgtest.so -DGTEST_MAIN_LIBRARY=/usr/lib/libgtest_main.so
-        make
-      # Creates a build directory, configures the project with CMake to link against Google Test libraries, and builds the executable
+      - name: Configure and Build Project
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DGTEST_LIBRARY=/usr/lib/libgtest.so -DGTEST_MAIN_LIBRARY=/usr/lib/libgtest_main.so
+          make
+        # Creates a build directory, configures the project with CMake to link against Google Test libraries, and builds the executable
 
-    - name: Run Tests
-      run: |
-        cd build
-        ./test_multiplication
-      # Executes the test binary to run the Google Test-based tests
+      - name: Run Tests
+        run: |
+          cd build
+          ./test_multiplication
+        # Executes the compiled test binary to run Google Test-based tests
 
+      # Release Process
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+        # Creates a new GitHub release with the specified tag and release name; the release is immediately published (not a draft)
 
-    #NOW WE ARE GOING TO INTEGRATE THE RELEASE PROCESS INTO GITHUB ACTIONS WORKFLOW ----->TO BE CHECKED
-    name: Create Release
-      id: create_release
-      uses: actions/create-release@v1 #create-release@v1 it's a github action predisposed to facilitate the creation of github releases
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} #here we are configuring the enviroment varialbles, in this specific case we have ${{secrets.GITHUB_TOKEN}} which is an
-      with:                              #an enviromental variable that we are going to use to authenticate the permission to create releases into our repository.
-       
-        tag_name: ${{ github.ref }}               #here we are assigning a nametag for the release. gitHub.ref refers to the branch that has triggered the workflow. 
-
-        release_name: Release ${{ github.ref }}   #we are assigning a name to our release. This is based on github.ref 
-
-        draft: false                              #if draft is set to false means that the release will be published immediately(non viene salvata come una bozza)
-
-        prerelease: false
-
-        name: Upload Release Asset              #describes the action of loading a file as a part of the release
-      id: upload_release_asset
-      uses: actions/upload-release-asset@v1     #we use this action (->upload_released_asset@v1) which is necessary to upload a file (which is the asset) into the just created release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} #the URL for the upload of the assets
-        asset_path: ./build/main #which is the local path of the file (asset ) to be loaded 
-        asset_name: main         #the name of the file into the release
-        asset_content_type: application/octet-stream  #content of the assets, in this case it's a generic binary type.
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/main
+          asset_name: main
+          asset_content_type: application/octet-stream
+        # Uploads the specified asset (the executable 'main') to the created release; the content type is set for a binary file
