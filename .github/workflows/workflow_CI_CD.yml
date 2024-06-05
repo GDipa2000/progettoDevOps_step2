@@ -1,14 +1,11 @@
-# Nome del workflow
 name: C++ MPI Matrix Multiplication CI
 
-# Eventi che attivano il workflow
 on:
   push:
     branches: [ "main" ]  # Si attiva con ogni push sul branch main
   pull_request:
     branches: [ "main" ]  # Si attiva con ogni pull request sul branch main
 
-# Permessi assegnati al token GITHUB_TOKEN durante il workflow
 permissions:
   contents: write
   actions: write
@@ -21,9 +18,7 @@ permissions:
   security-events: write
   statuses: write
 
-# Jobs del workflow
 jobs:
-  # Job per costruire e testare il progetto
   build-and-test:
     runs-on: ubuntu-latest  # Specifica il tipo di runner che il job utilizzerà
 
@@ -66,7 +61,6 @@ jobs:
           name: build-artifacts
           path: build/  # Specifica il percorso della directory da caricare
 
-  # Job per rilasciare il progetto
   release:
     needs: build-and-test  # Dipende dal completamento del job build-and-test
     runs-on: ubuntu-latest
@@ -90,7 +84,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1  # Crea una release su GitHub
         env:
-          GITHUBToken: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Assicura che il token di autenticazione sia correttamente configurato
         with:
           tag_name: ${{ github.run_id }}  # Imposta il tag usando l'ID della corsa
           release_name: Release ${{ github.run_id }}  # Imposta il nome della release
