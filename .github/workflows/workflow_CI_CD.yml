@@ -47,7 +47,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DGTEST_LIBRARY=/usr/lib/libgtest.so -DGTEST_MAIN
+          cmake .. -DGTEST_LIBRARY=/usr/lib/libgtest.so -DGTEST_MAIN_LIBRARY=/usr/lib/libgtest_main.so
           make
 
       - name: Run Tests
