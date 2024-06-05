@@ -1,4 +1,4 @@
-name: C++ MPI Matrix Multiplication CI
+name: Automation_step3
 
 # Definisce gli eventi che attiveranno il workflow
 on:
@@ -109,31 +109,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Singularity
-      run: |
-        export VERSION=3.5.3  # Specifica la versione di Singularity da installare
-        wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz &&
-        tar -xzf singularity-${VERSION}.tar.gz &&
-        cd singularity &&
-        ./mconfig &&
-        make -C ./builddir &&
-        sudo make -C ./builddir install
+      - name: Set up Singularity
+        run: |
+          export VERSION=3.5.3  # Specifica la versione di Singularity da installare
+          wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz &&
+          tar -xzf singularity-${VERSION}.tar.gz &&
+          cd singularity &&
+          ./mconfig &&
+          make -C ./builddir &&
+          sudo make -C ./builddir install
 
-    - name: Build and push Singularity container
-      run: |
-        singularity build matrix_multiplication.sif Singularity &&  # Costruisce il container Singularity
-        singularity push matrix_multiplication.sif library://your-username/default/matrix_multiplication:latest  # Carica il container su Singularity Library
+      - name: Build and push Singularity container
+        run: |
+          singularity build matrix_multiplication.sif Singularity &&  # Costruisce il container Singularity
+          singularity push matrix_multiplication.sif library://your-username/default/matrix_multiplication:latest  # Carica il container su Singularity Library
 
-    - name: SSH and run SLURM job
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SLURM_HOST }}
-        username: ${{ secrets.SLURM_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          module load singularity
-          singularity pull library://your-username/default/matrix_multiplication:latest
-          sbatch job.sh  # Sottomette un job SLURM per eseguire il container
+      - name: SSH and run SLURM job
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SLURM_HOST }}
+          username: ${{ secrets.SLURM_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            module load singularity
+            singularity pull library://your-username/default/matrix_multiplication:latest
+            sbatch job.sh  # Sottomette un job SLURM per eseguire il container
