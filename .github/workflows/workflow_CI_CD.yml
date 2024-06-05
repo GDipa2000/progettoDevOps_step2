@@ -1,6 +1,5 @@
 name: C++ MPI Matrix Multiplication CI
 
-# Trigger the workflow on push or pull request events to the main branch
 on:
   push:
     branches: [ "main" ]
@@ -24,7 +23,9 @@ jobs:
 
     - name: Compile and Build Google Test
       run: |
-        cd /usr/src/gtest
+        sudo mkdir /usr/local/gtest
+        sudo cp -r /usr/src/gtest/* /usr/local/gtest
+        cd /usr/local/gtest
         sudo cmake CMakeLists.txt -DBUILD_SHARED_LIBS=ON
         sudo make
         sudo cp *.so /usr/lib
@@ -41,7 +42,6 @@ jobs:
         cd build
         ./test_multiplication
 
-    # Release process integrated into GitHub Actions workflow
   release:
     needs: build-and-test
     runs-on: ubuntu-latest
