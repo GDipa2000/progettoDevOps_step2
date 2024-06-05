@@ -55,6 +55,12 @@ jobs:
           cd build
           ./test_multiplication
 
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: build/
+
   release:
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -62,6 +68,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: build
 
       - name: List files in build directory
         run: |
@@ -84,7 +96,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_data: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/test_multiplication
           asset_name: test_multiplication
           asset_content_type: application/octet-stream
