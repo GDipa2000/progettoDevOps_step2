@@ -1,11 +1,14 @@
+# Nome del workflow
 name: C++ MPI Matrix Multiplication CI
 
+# Eventi che attivano il workflow
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]  # Si attiva con ogni push sul branch main
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ]  # Si attiva con ogni pull request sul branch main
 
+# Permessi assegnati al token GITHUB_TOKEN durante il workflow
 permissions:
   contents: write
   actions: write
@@ -18,85 +21,88 @@ permissions:
   security-events: write
   statuses: write
 
+# Jobs del workflow
 jobs:
+  # Job per costruire e testare il progetto
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Specifica il tipo di runner che il job utilizzerà
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        
+        uses: actions/checkout@v4  # Estrae il codice dal repository GitHub
+
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y mpich libgtest-dev cmake
+          sudo apt-get update  # Aggiorna l'indice dei pacchetti
+          sudo apt-get install -y mpich libgtest-dev cmake  # Installa MPI, Google Test e CMake
 
       - name: Setup MPI
-        uses: mpi4py/setup-mpi@v1
+        uses: mpi4py/setup-mpi@v1  # Configura un ambiente MPI usando l'action mpi4py/setup-mpi
 
       - name: Compile and Build Google Test
         run: |
-          sudo mkdir -p /usr/local/gtest
-          sudo cp -r /usr/src/gtest/* /usr/local/gtest
+          sudo mkdir -p /usr/local/gtest  # Crea la directory per Google Test
+          sudo cp -r /usr/src/gtest/* /usr/local/gtest  # Copia i sorgenti di Google Test
           cd /usr/local/gtest
-          sudo cmake CMakeLists.txt -DBUILD_SHARED_LIBS=ON
-          sudo make
-          sudo cp /usr/local/gtest/lib/*.so /usr/lib
+          sudo cmake CMakeLists.txt -DBUILD_SHARED_LIBS=ON  # Configura Google Test con CMake
+          sudo make  # Compila Google Test
+          sudo cp /usr/local/gtest/lib/*.so /usr/lib  # Copia le librerie compilate nella directory lib
 
       - name: Configure and Build Project
         run: |
-          mkdir build
+          mkdir build  # Crea una directory per la costruzione del progetto
           cd build
-          cmake .. -DGTEST_LIBRARY=/usr/lib/libgtest.so -DGTEST_MAIN_LIBRARY=/usr/lib/libgtest_main.so
-          make
+          cmake .. -DGTEST_LIBRARY=/usr/lib/libgtest.so -DGTEST_MAIN_LIBRARY=/usr/lib/libgtest_main.so  # Configura il progetto con CMake
+          make  # Compila il progetto
 
       - name: Run Tests
         run: |
           cd build
-          ./test_multiplication
+          ./test_multiplication  # Esegue il test del progetto
 
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3  # Carica gli artifacts prodotti
         with:
           name: build-artifacts
-          path: build/
+          path: build/  # Specifica il percorso della directory da caricare
 
+  # Job per rilasciare il progetto
   release:
-    needs: build-and-test
+    needs: build-and-test  # Dipende dal completamento del job build-and-test
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # Estrae nuovamente il codice dal repository GitHub
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3  # Scarica gli artifacts prodotti dal job precedente
         with:
           name: build-artifacts
-          path: build
+          path: build  # Specifica dove salvare gli artifacts scaricati
 
       - name: List files in build directory
         run: |
           echo "Listing contents of the build directory..."
-          ls -la ./build
+          ls -la ./build  # Elenca i file nella directory build
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v1  # Crea una release su GitHub
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUBToken: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.run_id }}
-          release_name: Release ${{ github.run_id }}
+          tag_name: ${{ github.run_id }}  # Imposta il tag usando l'ID della corsa
+          release_name: Release ${{ github.run_id }}  # Imposta il nome della release
           draft: false
           prerelease: false
 
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v1  # Carica gli assets della release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/test_multiplication
-          asset_name: test_multiplication
-          asset_content_type: application/octet-stream
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # URL per l'upload degli assets
+          asset_path: ./build/test_multiplication  # Percorso del file da caricare
+          asset_name: test_multiplication  # Nome del file da caricare
+          asset_content_type: application/octet-stream  # Tipo di contenuto del file
