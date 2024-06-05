@@ -1,28 +1,23 @@
 #!/bin/bash
 
-# SLURM script for matrix multiplication job using Singularity
+# SBATCH Directives
+# Queste direttive configurano le opzioni del job scheduler.
 
-# Job configuration
-#SBATCH --job-name=matrix-mult                # Imposta il nome del job a "matrix-mult"
-#SBATCH --output=matrix_multiplication_out.txt # Reindirizza l'output standard del job a un file di testo
-#SBATCH --error=matrix_multiplication_err.txt  # Reindirizza l'output degli errori a un file di testo
-#SBATCH --time=00:05:00                        # Imposta la durata massima del job a 5 minuti
-#SBATCH --ntasks=2                             # Richiede 2 compiti (di solito processi)
-#SBATCH --cpus-per-task=1                      # Assegna 1 CPU per compito
-#SBATCH --mem=4GB                              # Assegna 4GB di memoria RAM per il job
+#SBATCH --job-name=matrix-mult                         # Nome del job, apparirà nei log e nei report del job scheduler.
+#SBATCH --output=matrix_multiplication_out.txt         # File in cui verrà scritto l'output standard.
+#SBATCH --error=matrix_multiplication_err.txt          # File in cui verrà scritto l'output degli errori.
+#SBATCH --time=00:05:00                                # Tempo massimo di esecuzione, hh:mm:ss. Dopo questo tempo, il job sarà terminato.
+#SBATCH --ntasks=2                                     # Numero totale di tasks da eseguire.
+#SBATCH --cpus-per-task=1                              # Numero di CPU per task.
+#SBATCH --mem=4GB                                      # Memoria totale allocata per il job.
 
-# Load necessary modules
-module load singularity                        # Carica il modulo singularity se non è già caricato
+# Preparazione dell'ambiente
+# Carica il modulo Singularity, se non è già caricato. Questo modulo permette di usare Singularity per gestire i container.
 
-# Run the Singularity container
-srun singularity exec --bind $(pwd):/progettoDevOps_step2 ./matrix_multiplication.sif \
-    $(pwd)/main /progettoDevOps_step2/matrixA.txt /progettoDevOps_step2/matrixB.txt
-# Comando sopra spiegato:
-# `srun` - esegue comandi in un ambiente di job SLURM
-# `singularity exec` - esegue un comando all'interno del contenitore Singularity
-# `--bind $(pwd):/progettoDevOps_step2` - monta la directory corrente (da cui lo script è eseguito) dentro il contenitore al percorso `/progettoDevOps_step2`
-# `./matrix_multiplication.sif` - specifica il file del contenitore Singularity da usare
-# `$(pwd)/main /progettoDevOps_step2/matrixA.txt /progettoDevOps_step2/matrixB.txt` - specifica i comandi/argomenti da eseguire all'interno del contenitore:
-# - `$(pwd)/main` - percorso del programma da eseguire
-# - `/progettoDevOps_step2/matrixA.txt` - primo file di input (matrice A)
-# - `/progettoDevOps_step2/matrixB.txt` - secondo file di input (matrice B)
+module load singularity
+
+# Esecuzione del container
+# Questo comando usa srun per eseguire il container Singularity. Si binda la directory corrente a una directory nel container,
+# e si esegue l'applicativo all'interno del container.
+
+srun singularity exec --bind $(pwd):/progettoDevOps_step2 ./matrix_multiplication.sif mpiexec -np 2 /progettoDevOps_step2/main /progettoDevops_step2/matrixA.txt /progettoDevops_step2/matrixB.txt
