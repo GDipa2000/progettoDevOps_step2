@@ -2,9 +2,9 @@ Bootstrap: docker
 From: ubuntu:18.04
 
 %post
-   apt-get update && apt-get install -y mpi
-   git clone https://github.com/GDipaola2000/SE4HPC_project_part2.git
-   cd SE4HPC_project_part2
+   apt-get update && apt-get install -y mpi git
+   git clone https://github.com/GDipa2000/progettoDevOps_step2.git
+   cd progettoDevOps_step2
    make
 
 %runscript

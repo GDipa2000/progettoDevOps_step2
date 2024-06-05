@@ -17,7 +17,6 @@ FetchContent_MakeAvailable(googletest)
 # Aggiungi la directory degli header files
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# non aggiungo matrix_mult che non serve
 set(SOURCES src/main.cpp)
 
 add_executable(main ${SOURCES})
