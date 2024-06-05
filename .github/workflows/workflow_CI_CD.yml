@@ -23,12 +23,12 @@ jobs:
 
     - name: Compile and Build Google Test
       run: |
-        sudo mkdir /usr/local/gtest
+        sudo mkdir -p /usr/local/gtest
         sudo cp -r /usr/src/gtest/* /usr/local/gtest
         cd /usr/local/gtest
         sudo cmake CMakeLists.txt -DBUILD_SHARED_LIBS=ON
         sudo make
-        sudo cp *.so /usr/lib
+        sudo cp /usr/local/gtest/lib/*.so /usr/lib
 
     - name: Configure and Build Project
       run: |
