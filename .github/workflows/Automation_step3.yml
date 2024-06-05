@@ -114,7 +114,17 @@ jobs:
 
       - name: Set up Singularity
         run: |
-          export VERSION=4.1.3  # Specifica la versione di Singularity da installare
+          name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libseccomp-dev
+
+      - name: Download and install Singularity
+        run: |
+          export VERSION=3.8.3  # Specifica la versione di Singularity da installare
           wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-ce-${VERSION}.tar.gz &&
           tar -xzf singularity-ce-${VERSION}.tar.gz &&
           cd singularity-ce-${VERSION} &&
